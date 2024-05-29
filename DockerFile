@@ -1,0 +1,22 @@
+FROM debian:latest as base-debian
+
+WORKDIR /DockerFile
+COPY /Pruebadocker /DockerFile/
+
+FROM httpd:latest as Server-Web
+RUN apk add --update nodejs npm
+
+FROM node:latest AS node-builder
+WORKDIR /Prueba-Dockerfile/Prueba-Docker
+
+COPY Pruebadocker/ /Prueba-Dockerfile/Prueba-Docker
+
+RUN npm install 
+RUN npm run build --prod
+ 
+FROM nginx:1.17.1-alpine
+RUN apk add --update nodejs npm
+COPY --from=node-builder /Prueba-Dockerfile/Pruebadocker/dist/prueba-docker/browser/index.html /usr/local/apache2/htdocs/
+
+EXPOSE 80
+EXPOSE 4000
